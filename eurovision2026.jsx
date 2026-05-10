@@ -43,10 +43,11 @@ const ENTRIES = [
 
 const TIERS = [
   { id: 'S', min: 9,   color: '#FFD700', bg: '#1C1600', glow: '#FFD70070' },
-  { id: 'A', min: 7,   color: '#E879F9', bg: '#1A0020', glow: '#E879F970' },
-  { id: 'B', min: 5,   color: '#38BDF8', bg: '#001422', glow: '#38BDF870' },
-  { id: 'C', min: 3,   color: '#4ADE80', bg: '#001A08', glow: '#4ADE8070' },
-  { id: 'D', min: 0.5, color: '#FB923C', bg: '#1C0800', glow: '#FB923C70' },
+  { id: 'A', min: 8,   color: '#E879F9', bg: '#1A0020', glow: '#E879F970' },
+  { id: 'B', min: 6,   color: '#38BDF8', bg: '#001422', glow: '#38BDF870' },
+  { id: 'C', min: 4,   color: '#4ADE80', bg: '#001A08', glow: '#4ADE8070' },
+  { id: 'D', min: 2,   color: '#FB923C', bg: '#1C0800', glow: '#FB923C70' },
+  { id: 'F', min: 1,   color: '#A0AEC0', bg: '#0A0A14', glow: '#A0AEC070' },
 ];
 
 const ISO_NUMERIC = {
@@ -77,12 +78,9 @@ function getTier(rating) {
   return null;
 }
 
-const WHOLE  = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const HALVES = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5];
-
 function scoreLabel(n) {
-  const w = Math.floor(n);
-  return n % 1 ? (w === 0 ? '½' : `${w}½`) : String(w);
+  if (n == null) return '—';
+  return String(n);
 }
 
 /* ─── FLAG IMAGE ─────────────────────────────────────────── */
@@ -105,30 +103,71 @@ function Flag({ id, size = 52 }) {
   );
 }
 
-/* ─── SCORE BUTTON ───────────────────────────────────────── */
+/* ─── SCORE SLIDER ──────────────────────────────────────── */
 
-function ScoreBtn({ n, active, onToggle }) {
-  const t = getTier(n);
+function ScoreSlider({ rating, onRate }) {
+  const tier = getTier(rating);
   return (
-    <button
-      onClick={onToggle}
-      title={String(n)}
-      style={{
-        width: 22, height: 19,
-        borderRadius: 3,
-        border: active ? `2px solid ${t.color}` : '1px solid #232332',
-        background: active ? t.bg : '#0A0A14',
-        color: active ? t.color : '#30303F',
-        fontSize: 8.5, fontWeight: 700,
-        cursor: 'pointer',
-        fontFamily: "'IBM Plex Mono', monospace",
-        lineHeight: 1, padding: 0,
-        boxShadow: active ? `0 0 7px ${t.glow}` : 'none',
-        transition: 'all 0.1s',
-      }}
-    >{scoreLabel(n)}</button>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <input
+        type="range"
+        min="1"
+        max="10"
+        step="0.1"
+        value={rating || 1}
+        onChange={(e) => {
+          const val = parseFloat(e.target.value);
+          onRate(val);
+        }}
+        style={{
+          flex: 1,
+          height: 6,
+          borderRadius: 3,
+          background: tier ? `linear-gradient(90deg, ${tier.color}, ${tier.bg})` : '#1A1A28',
+          cursor: 'pointer',
+          appearance: 'none',
+          WebkitAppearance: 'none',
+        }}
+      />
+      <style>{`
+        input[type="range"]::-webkit-slider-thumb {
+          appearance: none;
+          -webkit-appearance: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: ${tier ? tier.color : '#555'};
+          cursor: pointer;
+          border: 2px solid ${tier ? tier.bg : '#1A1A28'};
+          box-shadow: ${tier ? `0 0 8px ${tier.glow}` : 'none'};
+          transition: all 0.15s;
+        }
+        input[type="range"]::-moz-range-thumb {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: ${tier ? tier.color : '#555'};
+          cursor: pointer;
+          border: 2px solid ${tier ? tier.bg : '#1A1A28'};
+          box-shadow: ${tier ? `0 0 8px ${tier.glow}` : 'none'};
+          transition: all 0.15s;
+        }
+      `}</style>
+      <div style={{
+        width: 40, height: 40, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 18, fontWeight: 900,
+        color: tier ? tier.color : '#252535',
+        fontFamily: "'Cinzel', serif",
+        textShadow: tier ? `0 0 14px ${tier.glow}` : 'none',
+        border: `2px solid ${tier ? tier.color + '45' : '#1A1A28'}`,
+        borderRadius: 7,
+        background: tier ? tier.bg : '#0C0C14',
+      }}>{tier ? tier.id : '·'}</div>
+    </div>
   );
 }
+
 
 /* ─── RATE VIEW ──────────────────────────────────────────── */
 
@@ -143,7 +182,7 @@ function RateView({ ratings, onRate }) {
             background: tier ? `linear-gradient(135deg, ${tier.bg}, #0C0C14)` : '#0C0C14',
             border: `1px solid ${tier ? tier.color + '30' : '#1A1A28'}`,
             borderRadius: 10, padding: '10px 12px',
-            display: 'flex', alignItems: 'center', gap: 10,
+            display: 'flex', alignItems: 'flex-start', gap: 10,
             transition: 'border-color 0.2s, background 0.25s',
           }}>
             <Flag id={e.id} size={58} />
@@ -157,29 +196,10 @@ function RateView({ ratings, onRate }) {
               <div style={{ fontSize: 8.5, color: '#444', fontFamily: "'IBM Plex Mono', monospace", fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 "{e.song}"
               </div>
-              <div style={{ marginTop: 7, display: 'flex', gap: 2 }}>
-                {WHOLE.map(n => (
-                  <ScoreBtn key={n} n={n} active={rating === n} onToggle={() => onRate(e.id, rating === n ? null : n)} />
-                ))}
-              </div>
-              <div style={{ marginTop: 2, display: 'flex', gap: 2 }}>
-                {HALVES.map(n => (
-                  <ScoreBtn key={n} n={n} active={rating === n} onToggle={() => onRate(e.id, rating === n ? null : n)} />
-                ))}
+              <div style={{ marginTop: 10 }}>
+                <ScoreSlider rating={rating} onRate={(val) => onRate(e.id, val)} />
               </div>
             </div>
-            <div style={{
-              width: 34, height: 34, flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 19, fontWeight: 900,
-              color: tier ? tier.color : '#252535',
-              fontFamily: "'Cinzel', serif",
-              textShadow: tier ? `0 0 14px ${tier.glow}` : 'none',
-              border: `2px solid ${tier ? tier.color + '45' : '#1A1A28'}`,
-              borderRadius: 7,
-              background: tier ? tier.bg : '#0C0C14',
-              transition: 'all 0.2s',
-            }}>{tier ? tier.id : '·'}</div>
           </div>
         );
       })}
@@ -416,7 +436,7 @@ function MapView({ ratings }) {
           <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
             <div style={{ width: 22, height: 22, borderRadius: 4, background: t.bg, border: `2px solid ${t.color + '60'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900, color: t.color, fontFamily: "'Cinzel', serif" }}>{t.id}</div>
             <div style={{ fontSize: 8, color: '#555', fontFamily: 'monospace' }}>
-              {t.id === 'S' ? '9 – 10' : t.id === 'A' ? '7 – 8.5' : t.id === 'B' ? '5 – 6.5' : t.id === 'C' ? '3 – 4.5' : '0.5 – 2.5'}
+              {t.id === 'S' ? '9.0 – 10.0' : t.id === 'A' ? '8.0 – 8.9' : t.id === 'B' ? '6.0 – 7.9' : t.id === 'C' ? '4.0 – 5.9' : t.id === 'D' ? '2.0 – 3.9' : '1.0 – 1.9'}
             </div>
           </div>
         ))}
@@ -431,9 +451,28 @@ function MapView({ ratings }) {
 
 /* ─── ROOT ───────────────────────────────────────────────── */
 
+function getInitialRatings() {
+  try {
+    const saved = localStorage.getItem('eurovision2026_ratings');
+    return saved ? JSON.parse(saved) : {};
+  } catch (e) {
+    console.warn('Failed to load ratings from localStorage:', e);
+    return {};
+  }
+}
+
 export default function Eurovision2026() {
-  const [ratings, setRatings] = useState({});
+  const [ratings, setRatings] = useState(getInitialRatings);
   const [view, setView] = useState('rate');
+
+  // Save ratings to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('eurovision2026_ratings', JSON.stringify(ratings));
+    } catch (e) {
+      console.warn('Failed to save ratings to localStorage:', e);
+    }
+  }, [ratings]);
 
   const onRate = (id, rating) => setRatings(prev => {
     if (rating == null) { const n = { ...prev }; delete n[id]; return n; }

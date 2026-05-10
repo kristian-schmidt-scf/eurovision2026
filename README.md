@@ -2,13 +2,13 @@
 
 A personal scorecard for the **Eurovision Song Contest 2026** — Vienna, 16 May, 70th edition.
 
-Rate all 35 entries on a 0.5–10 scale and explore your picks through four views.
+Rate all 35 entries on a 1–10 scale (with 0.1 increments) and explore your picks through four views. Your ratings are automatically saved to your browser's localStorage.
 
 ---
 
 ## Features
 
-**Rate All** — Score every entry with whole or half-point buttons (0.5–10). Cards light up in tier color as you rate.
+**Rate All** — Score every entry using an adjustable slider (1.0–10.0). Cards light up in tier color as you rate. Ratings persist across page reloads.
 
 **Tier List** — Classic tier-list layout. Entries sorted by score within each tier row.
 
@@ -21,12 +21,13 @@ Rate all 35 entries on a 0.5–10 scale and explore your picks through four view
 ## Tier System
 
 | Tier | Score range | Color  |
-|------|-------------|--------|
-| S    | 9 – 10      | Gold   |
-| A    | 7 – 8.5     | Pink   |
-| B    | 5 – 6.5     | Blue   |
-| C    | 3 – 4.5     | Green  |
-| D    | 0.5 – 2.5   | Orange |
+| ---- | ----------- | ------ |
+| S    | 9.0 – 10.0  | Gold   |
+| A    | 8.0 – 8.9   | Pink   |
+| B    | 6.0 – 7.9   | Blue   |
+| C    | 4.0 – 5.9   | Green  |
+| D    | 2.0 – 3.9   | Orange |
+| F    | 1.0 – 1.9   | Gray   |
 
 ---
 
@@ -38,20 +39,33 @@ Albania, Armenia, Australia, Austria, Azerbaijan, Belgium, Bulgaria, Croatia, Cy
 
 ## Usage
 
-This is a single React component. Drop it into any React project that has D3 installed:
+This is a single React component built with Vite. To run locally:
 
 ```bash
-npm install d3
+npm install
+npm run dev
 ```
 
-Then import and render the default export:
+Then open `http://localhost:5173` in your browser. To access from other devices on the same WiFi:
 
-```jsx
-import Eurovision2026 from './eurovision2026';
+```bash
+ipconfig
+```
+
+Find your local IP address and visit `http://<YOUR_IP>:5173` on any device.
+
+---
+
+## Dependencies
+
+- **React** 18.2+
+- **D3** 7.9+
+- **Vite** (dev server)
 
 export default function App() {
-  return <Eurovision2026 />;
+return <Eurovision2026 />;
 }
+
 ```
 
 The component loads TopoJSON and world map data from CDN at runtime — no extra setup needed. Flags are fetched from [flagcdn.com](https://flagcdn.com).
@@ -67,3 +81,4 @@ The component loads TopoJSON and world map data from CDN at runtime — no extra
 - [world-atlas](https://github.com/topojson/world-atlas) + [topojson-client](https://github.com/topojson/topojson-client) (loaded from CDN)
 - [flagcdn.com](https://flagcdn.com) for flag images
 - [Cinzel](https://fonts.google.com/specimen/Cinzel) + [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) from Google Fonts
+```
