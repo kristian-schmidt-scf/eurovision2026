@@ -5,38 +5,28 @@ import * as d3 from "d3";
 
 const ENTRIES = [
   { id: 'al', country: 'Albania',        artist: 'Alis',                             song: 'Nân' },
-  { id: 'am', country: 'Armenia',        artist: 'Simón',                            song: 'Paloma Rumba' },
   { id: 'au', country: 'Australia',      artist: 'Delta Goodrem',                    song: 'Eclipse' },
   { id: 'at', country: 'Austria',        artist: 'Cosmó',                            song: 'Tanzschein' },
-  { id: 'az', country: 'Azerbaijan',     artist: 'Jiva',                             song: 'Just Go' },
   { id: 'be', country: 'Belgium',        artist: 'Essyla',                           song: 'Dancing on the Ice' },
   { id: 'bg', country: 'Bulgaria',       artist: 'Dara',                             song: 'Bangaranga' },
   { id: 'hr', country: 'Croatia',        artist: 'Lelek',                            song: 'Andromeda' },
   { id: 'cy', country: 'Cyprus',         artist: 'Antigoni',                         song: 'Jalla' },
   { id: 'cz', country: 'Czechia',        artist: 'Daniel Žižka',                     song: 'Crossroads' },
   { id: 'dk', country: 'Denmark',        artist: 'Søren Torpegaard Lund',            song: 'Før vi går hjem' },
-  { id: 'ee', country: 'Estonia',        artist: 'Vanilla Ninja',                    song: 'Too Epic to Be True' },
   { id: 'fi', country: 'Finland',        artist: 'Linda Lampenius & Pete Parkkonen', song: 'Liekinheitin' },
   { id: 'fr', country: 'France',         artist: 'Monroe',                           song: 'Regarde !' },
-  { id: 'ge', country: 'Georgia',        artist: 'Bzikebi',                          song: 'On Replay' },
   { id: 'de', country: 'Germany',        artist: 'Sarah Engels',                     song: 'Fire' },
   { id: 'gr', country: 'Greece',         artist: 'Akylas',                           song: 'Ferto' },
   { id: 'il', country: 'Israel',         artist: 'Noam Bettan',                      song: 'Michelle' },
   { id: 'it', country: 'Italy',          artist: 'Sal Da Vinci',                     song: 'Per sempre sì' },
-  { id: 'lv', country: 'Latvia',         artist: 'Atvara',                           song: 'Ēnā' },
   { id: 'lt', country: 'Lithuania',      artist: 'Lion Ceccah',                      song: 'Sólo quiero más' },
-  { id: 'lu', country: 'Luxembourg',     artist: 'Eva Marija',                       song: 'Mother Nature' },
   { id: 'mt', country: 'Malta',          artist: 'Aidan',                            song: 'Bella' },
   { id: 'md', country: 'Moldova',        artist: 'Satoshi',                          song: 'Viva, Moldova!' },
-  { id: 'me', country: 'Montenegro',     artist: 'Tamara Živković',                  song: 'Nova Zora' },
   { id: 'no', country: 'Norway',         artist: 'Jonas Lovv',                       song: 'Ya Ya Ya' },
   { id: 'pl', country: 'Poland',         artist: 'Alicja',                           song: 'Pray' },
-  { id: 'pt', country: 'Portugal',       artist: 'Bandidos do Cante',                song: 'Rosa' },
   { id: 'ro', country: 'Romania',        artist: 'Alexandra Căpitănescu',            song: 'Choke Me' },
-  { id: 'sm', country: 'San Marino',     artist: 'Senhit',                           song: 'Superstar' },
   { id: 'rs', country: 'Serbia',         artist: 'Lavina',                           song: 'Kraj Mene' },
   { id: 'se', country: 'Sweden',         artist: 'Felicia',                          song: 'My System' },
-  { id: 'ch', country: 'Switzerland',    artist: 'Veronica Fusaro',                  song: 'Alice' },
   { id: 'ua', country: 'Ukraine',        artist: 'Leléka',                           song: 'Ridnym' },
   { id: 'gb', country: 'United Kingdom', artist: 'Look Mum No Computer',             song: 'Eins, Zwei, Drei' },
 ];
@@ -51,13 +41,13 @@ const TIERS = [
 ];
 
 const ISO_NUMERIC = {
-  al:'8',  am:'51',  au:'36',  at:'40',  az:'31',
+  al:'8',  au:'36',  at:'40',
   be:'56', bg:'100', hr:'191', cy:'196', cz:'203',
-  dk:'208',ee:'233', fi:'246', fr:'250', ge:'268',
-  de:'276',gr:'300', il:'376', it:'380', lv:'428',
-  lt:'440',lu:'442', mt:'470', md:'498', me:'499',
-  no:'578',pl:'616', pt:'620', ro:'642', sm:'674',
-  rs:'688',se:'752', ch:'756', ua:'804', gb:'826',
+  dk:'208',fi:'246', fr:'250',
+  de:'276',gr:'300', il:'376', it:'380',
+  lt:'440',mt:'470', md:'498',
+  no:'578',pl:'616', ro:'642',
+  rs:'688',se:'752', ua:'804', gb:'826',
 };
 
 const numToEntry = {};
@@ -67,7 +57,7 @@ ENTRIES.forEach(e => {
 });
 
 // Entries shown in map inlay (geographically off the Europe-centered map)
-const INLAY_IDS = new Set(['au', 'am', 'az', 'ge', 'il']);
+const INLAY_IDS = new Set(['au', 'il']);
 const INLAY_ENTRIES = ENTRIES.filter(e => INLAY_IDS.has(e.id));
 
 /* ─── HELPERS ────────────────────────────────────────────── */
@@ -105,7 +95,7 @@ function Flag({ id, size = 52 }) {
 
 /* ─── SCORE SLIDER ──────────────────────────────────────── */
 
-function ScoreSlider({ rating, onRate }) {
+function ScoreSlider({ rating, onRate, onClear }) {
   const tier = getTier(rating);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -114,7 +104,7 @@ function ScoreSlider({ rating, onRate }) {
         min="1"
         max="10"
         step="0.1"
-        value={rating || 1}
+        value={rating ?? 1}
         onChange={(e) => {
           const val = parseFloat(e.target.value);
           onRate(val);
@@ -154,16 +144,41 @@ function ScoreSlider({ rating, onRate }) {
         }
       `}</style>
       <div style={{
-        width: 40, height: 40, flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 18, fontWeight: 900,
-        color: tier ? tier.color : '#252535',
-        fontFamily: "'Cinzel', serif",
-        textShadow: tier ? `0 0 14px ${tier.glow}` : 'none',
+        padding: '0 10px', minWidth: 60, height: 40, flexShrink: 0,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        fontSize: 13, fontWeight: 700,
+        color: tier ? tier.color : '#AAA',
+        fontFamily: "'IBM Plex Mono', monospace",
+        textShadow: tier ? `0 0 10px ${tier.glow}` : 'none',
         border: `2px solid ${tier ? tier.color + '45' : '#1A1A28'}`,
-        borderRadius: 7,
+        borderRadius: 10,
         background: tier ? tier.bg : '#0C0C14',
-      }}>{tier ? tier.id : '·'}</div>
+      }}>
+        <div style={{ fontSize: 14, fontWeight: 900 }}>{rating != null ? rating.toFixed(1) : '—'}</div>
+        <div style={{ fontSize: 10, marginTop: 2, color: tier ? tier.color : '#777' }}>{tier ? tier.id : '·'}</div>
+      </div>
+      {rating != null && (
+        <button
+          type="button"
+          onClick={onClear}
+          title="Clear rating"
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            border: '1px solid #333',
+            background: '#0B0B12',
+            color: '#AAA',
+            cursor: 'pointer',
+            fontSize: 16,
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+        >✕</button>
+      )}
     </div>
   );
 }
@@ -197,7 +212,7 @@ function RateView({ ratings, onRate }) {
                 "{e.song}"
               </div>
               <div style={{ marginTop: 10 }}>
-                <ScoreSlider rating={rating} onRate={(val) => onRate(e.id, val)} />
+                <ScoreSlider rating={rating} onRate={(val) => onRate(e.id, val)} onClear={() => onRate(e.id, null)} />
               </div>
             </div>
           </div>
